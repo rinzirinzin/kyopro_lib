@@ -1,0 +1,591 @@
+{
+	"atcoder": {
+		"prefix": "atc",
+		"body": [
+			"import bisect",
+			"import collections",
+			"import copy",
+			"import heapq",
+			"import itertools",
+			"import math",
+			"import sys",
+			"from collections import deque",
+			"from itertools import groupby, product",
+			"",
+			"#再帰関数の呼び出し制限",
+			"sys.setrecursionlimit(10**7)",
+			"",
+			"mod = 10**9+7",
+			"#mod = 998244353",
+			"inf = 2<<50"
+		],
+		"description": "Atcoderで使うモジュール集です。"
+	},
+
+	"unionfind": {
+		"prefix": "unionfind",
+		"body": [
+		"from collections import defaultdict",
+		"",
+		"class UnionFind():",
+		"    \"\"\"",
+		"    Union Find木クラス",
+		"",
+		"    Attributes",
+		"    --------------------",
+		"    n : int",
+		"        要素数",
+		"    root : list",
+		"        木の要素数",
+		"        0未満であればそのノードが根であり、添字の値が要素数",
+		"    rank : list",
+		"        木の深さ",
+		"    \"\"\"",
+		"",
+		"    def __init__(self, n):",
+		"        \"\"\"",
+		"        Parameters",
+		"        ---------------------",
+		"        n : int",
+		"            要素数",
+		"        \"\"\"",
+		"        self.n = n",
+		"        self.root = [-1]*(n+1)",
+		"        self.rank = [0]*(n+1)",
+		"",
+		"    def find(self, x):",
+		"        \"\"\"",
+		"        ノードxの根を見つける",
+		"",
+		"        Parameters",
+		"        ---------------------",
+		"        x : int",
+		"            見つけるノード",
+		"",
+		"        Returns",
+		"        ---------------------",
+		"        root : int",
+		"            根のノード",
+		"        \"\"\"",
+		"        if(self.root[x] < 0):",
+		"            return x",
+		"        else:",
+		"            self.root[x] = self.find(self.root[x])",
+		"            return self.root[x]",
+		"",
+		"    def unite(self, x, y):",
+		"        \"\"\"",
+		"        木の併合",
+		"",
+		"        Parameters",
+		"        ---------------------",
+		"        x : int",
+		"            併合したノード",
+		"        y : int",
+		"            併合したノード",
+		"        \"\"\"",
+		"        x = self.find(x)",
+		"        y = self.find(y)",
+		"",
+		"        if(x == y):",
+		"            return",
+		"        elif(self.rank[x] > self.rank[y]):",
+		"            self.root[x] += self.root[y]",
+		"            self.root[y] = x",
+		"        else:",
+		"            self.root[y] += self.root[x]",
+		"            self.root[x] = y",
+		"            if(self.rank[x] == self.rank[y]):",
+		"                self.rank[y] += 1",
+		"",
+		"    def same(self, x, y):",
+		"        \"\"\"",
+		"        同じグループに属するか判定",
+		"",
+		"        Parameters",
+		"        ---------------------",
+		"        x : int",
+		"            判定したノード",
+		"        y : int",
+		"            判定したノード",
+		"",
+		"        Returns",
+		"        ---------------------",
+		"        ans : bool",
+		"            同じグループに属しているか",
+		"        \"\"\"",
+		"        return self.find(x) == self.find(y)",
+		"",
+		"    def size(self, x):",
+		"        \"\"\"",
+		"        木のサイズを計算",
+		"",
+		"        Parameters",
+		"        ---------------------",
+		"        x : int",
+		"            計算したい木のノード",
+		"",
+		"        Returns",
+		"        ---------------------",
+		"        size : int",
+		"            木のサイズ",
+		"        \"\"\"",
+		"        return -self.root[self.find(x)]",
+		"",
+		"    def roots(self):",
+		"        \"\"\"",
+		"        根のノードを取得",
+		"",
+		"        Returns",
+		"        ---------------------",
+		"        roots : list",
+		"            根のノード",
+		"        \"\"\"",
+		"        return [i for i, x in enumerate(self.root) if x < 0]",
+		"",
+		"    def group_size(self):",
+		"        \"\"\"",
+		"        グループ数を取得",
+		"",
+		"        Returns",
+		"        ---------------------",
+		"        size : int",
+		"            グループ数",
+		"        \"\"\"",
+		"        return len(self.roots())",
+		"",
+		"    def group_members(self):",
+		"        \"\"\"",
+		"        全てのグループごとのノードを取得",
+		"",
+		"        Returns",
+		"        ---------------------",
+		"        group_members : defaultdict",
+		"            根をキーとしたノードのリスト",
+		"        \"\"\"",
+		"        group_members = defaultdict(list)",
+		"        for member in range(self.n):",
+		"            group_members[self.find(member)].append(member)",
+		"        return group_members"
+		],
+		"description": "unionfind"
+	},
+
+	"runlength": {
+		"prefix": "run",
+		"body": [
+			"# RUN LENGTH ENCODING str -> list(tuple())",
+			"# example) \"aabbbbaaca\" -> [('a', 2), ('b', 4), ('a', 2), ('c', 1), ('a', 1)]",
+			"def runLengthEncode(S: str) -> \"list[tuple(str, int)]\":",
+			"    grouped = groupby(S)",
+			"    res = []",
+			"    for k, v in grouped:",
+			"        res.append((k, int(len(list(v)))))",
+			"    return res",
+			"",
+			"# RUN LENGTH DECODING list(tuple()) -> str",
+			"# example) [('a', 2), ('b', 4), ('a', 2), ('c', 1), ('a', 1)] -> \"aabbbbaaca\"",
+			"def runLengthDecode(L: \"list[tuple]\") -> str:",
+			"    res = \"\"",
+			"    for c, n in L:",
+			"        res += c * int(n)",
+			"    return res",
+			"",
+			"# RUN LENGTH ENCODING str -> str",
+			"# example) \"aabbbbaaca\" -> \"a2b4a2c1a1\"",
+			"def runLengthEncodeToString(S: str) -> str:",
+			"    grouped = groupby(S)",
+			"    res = \"\"",
+			"    for k, v in grouped:",
+			"        res += k + str(len(list(v)))",
+			"    return res",
+			"",
+		],
+		"description": "RunLength圧縮の関数"
+	},
+
+	"nCr": {
+		"prefix": "nCr",
+		"body": [
+		"#nCr (コンビネーション)",
+		"from operator import mul",
+		"from functools import reduce",
+		"def nCr(n, r):",
+		"    r = min(r, n - r)",
+		"    numer = reduce(mul, range(n, n - r, -1), 1)",
+		"    denom = reduce(mul, range(1, r + 1), 1)",
+		"    return numer // denom",
+		""
+		],
+		"description": "nCr : コンビネーション"
+	},
+
+	"prime": {
+		"prefix": "prime",
+		"body": [
+		"",
+		"#素数判定",
+		"def prime_judge(N):",
+		"    for i in range(2, N + 1):",
+		"        if i * i > N:",
+		"            break",
+		"        if N % i == 0:",
+		"            return False",
+		"    return N != 1",
+		"",
+		"#素数列挙(N以下)",
+		"def erastos(N):",
+		"    N=N+1",
+		"    prime = [True for i in range(N+1)]",
+		"    prime[0] = False #0 is not prime",
+		"    prime[1] = False #1 is not prime",
+		"    sqrt_n = math.ceil(math.sqrt(N)) #ceil ex 7.09 -> 8",
+		"    for i in range(2,sqrt_n):",
+		"        if prime[i]:",
+		"            for j in range(2*i,N+1,i):",
+		"                prime[j] = False",
+		"    return prime",
+		"",
+		"#素因数分解",
+		"def prime_factorize(N):",
+		"    a = []",
+		"    while N % 2 == 0:",
+		"        a.append(2)",
+		"        N //= 2",
+		"    f = 3",
+		"    while f * f <= N:",
+		"        if N % f == 0:",
+		"            a.append(f)",
+		"            N //= f",
+		"        else:",
+		"            f += 2",
+		"    if N != 1:",
+		"        a.append(N)",
+		"    return a",
+		""
+		],
+		"description": "素数関係"
+	},
+
+	"sosu": {
+		"prefix": "prime",
+		"body": [
+		"",
+		"#素数判定",
+		"def prime_judge(N):",
+		"    for i in range(2, N + 1):",
+		"        if i * i > N:",
+		"            break",
+		"        if N % i == 0:",
+		"            return False",
+		"    return N != 1",
+		"",
+		"#素数列挙(N以下)",
+		"def erastos(N):",
+		"    N=N+1",
+		"    prime = [True for i in range(N+1)]",
+		"    prime[0] = False #0 is not prime",
+		"    prime[1] = False #1 is not prime",
+		"    sqrt_n = math.ceil(math.sqrt(N)) #ceil ex 7.09 -> 8",
+		"    for i in range(2,sqrt_n):",
+		"        if prime[i]:",
+		"            for j in range(2*i,N+1,i):",
+		"                prime[j] = False",
+		"    return prime",
+		"",
+		"#素因数分解",
+		"def prime_factorize(N):",
+		"    a = []",
+		"    while N % 2 == 0:",
+		"        a.append(2)",
+		"        N //= 2",
+		"    f = 3",
+		"    while f * f <= N:",
+		"        if N % f == 0:",
+		"            a.append(f)",
+		"            N //= f",
+		"        else:",
+		"            f += 2",
+		"    if N != 1:",
+		"        a.append(N)",
+		"    return a",
+		""
+		],
+		"description": "素数関係"
+	},
+
+	"gcd_list": {
+		"prefix": "gcd",
+		"body": [
+		"#リストの最大公約数",
+		"def gcdl(list_g):",
+		"    ans = 0",
+		"    for i in range(len(list_g)):",
+		"        ans = math.gcd(ans,list_g[i])",
+		"    return ans",
+		""
+		],
+		"description": "gcd_list"
+	},
+
+	"ruiseki": {
+		"prefix": "ruiseki",
+		"body": [
+		"#累積和",
+		"def ruiseki(A):",
+		"    S = list(itertools.accumulate(A))",
+		"    return S",
+		"",
+		"#2次元累積和",
+		"def ruiseki_2d(X,H,W):",
+		"    Sx = []",
+		"    for i in range(H):",
+		"        Sx.append(ruiseki(X[i]))",
+		"    #転置(list-tupleに注意)",
+		"    Sy = list(zip(*Sx))",
+		"    S = []",
+		"    for i in range(W):",
+		"        S.append(ruiseki(Sy[i]))",
+		"    S2d = list(zip(*S))",
+		"    return S2d"
+		],
+		"description": "累積和"
+	},
+
+	"2dset": {
+		"prefix": "2dset",
+		"body": [
+		"#2次元set",
+		"def uniq2d(A):",
+		"    B = list(map(list, set(map(tuple, A))))",
+		"    return B",
+		""
+		],
+		"description": "2次元set"
+	},
+
+	"yakusu": {
+		"prefix": "yakusu",
+		"body": [
+		"#約数列挙 O(√N)",
+		"def make_divisors(n):",
+		"    lower_divisors , upper_divisors = [], []",
+		"    i = 1",
+		"    while i*i <= n:",
+		"        if n % i == 0:",
+		"            lower_divisors.append(i)",
+		"            if i != n // i:",
+		"                upper_divisors.append(n//i)",
+		"        i += 1",
+		"    return lower_divisors + upper_divisors[::-1]"
+		],
+		"description": "約数列挙"
+	},
+
+	"matrix": {
+		"prefix": "matrix",
+		"body": [
+		"#2x2の行列 -> 3の時は2を3に",
+		"def matrix_2d(A,B,mod):",
+		"    C = [[0,0] for _ in range(2)]",
+		"    for i in range(2):",
+		"        for j in range(2):",
+		"            for k in range(2):",
+		"                C[i][j] += A[i][k]*B[k][j]",
+		"                C[i][j] %= mod",
+		"    return C",
+		"",
+		"#行列累乗",
+		"#Aは行列、Nは項数(N-2とか渡す。)",
+		"def modpow_matrix(A,N,mod):",
+		"    ans = A",
+		"    p = A",
+		"    for i in range(60): #確認",
+		"        if (N & (1 << i)) != 0:",
+		"            ans = matrix_2d(ans,p,mod)",
+		"        p = matrix_2d(p,p,mod)",
+		"    return ans",
+		""
+		],
+		"description": "行列累乗"
+	},
+
+	"myinput": {
+		"prefix": "myinput",
+		"body": [
+		"#文字と数字が混ざっている場合のインプット",
+		"def myinput(ty):",
+		"    return (ty(inp) for (inp, ty) in zip(input().split(), ty))",
+		"",
+		"ai, bi, ci, di = myinput((int, str, int, str))"
+		],
+		"description": ""
+	},
+
+	"intinput": {
+		"prefix": "N = in",
+		"body": [
+		"N = int(input())"
+		],
+		"description": "intinput"
+	},
+
+	"strinput": {
+		"prefix": "S = in",
+		"body": [
+		"S = input()"
+		],
+		"description": "strinput"
+	},
+
+	"listinputS": {
+		"prefix": "S = []",
+		"body": [
+		"#Read List object",
+		"S = []",
+		"for i in range(N):",
+		"    S.append(input())",
+		""
+		],
+		"description": "mojiinput"
+	},
+
+	"mapinputNM": {
+		"prefix": "N,M",
+		"body": [
+		"N,M = map(int,input().split())"
+		],
+		"description": "mapinput"
+	},
+
+	"mapinputNK": {
+		"prefix": "N,K",
+		"body": [
+		"N,K = map(int,input().split())"
+		],
+		"description": "mapinput"
+	},
+
+	"mapinputAB": {
+		"prefix": "A,B",
+		"body": [
+		"A,B = map(int,input().split())"
+		],
+		"description": "mapinput"
+	},
+
+	"sepinputA": {
+		"prefix": "A = li",
+		"body": [
+		"A = list(map(int,input().split()))"
+		],
+		"description": "sepinput"
+	},
+
+	"listinputA": {
+		"prefix": "A = []",
+		"body": [
+		"#Read List object",
+		"A = []",
+		"for i in range(N):",
+		"    A.append(list(map(int,input().split())))"
+		],
+		"description": "sepinput"
+	},
+
+	"graphinput": {
+		"prefix": "N,M = g",
+		"body": [
+		"#グラフ受け取り",
+		"from collections import deque",
+		"N,M = map(int,input().split())",
+		"judge = [-1 for _ in range(N)]",
+		"graph = [[] for i in range(N)]",
+		"",
+		"for i in range(M):",
+		"    A,B = map(int,input().split())",
+		"    graph[A-1].append(B-1)",
+		"    graph[B-1].append(A-1)",
+		"",
+		"chk = deque()",
+		""
+		],
+		"description": "graphinput"
+	},
+
+	"for i in range()": {
+		"prefix": "for i",
+		"body": [
+			"for i in range($1):",
+			""
+		],
+		"description": "for"
+	},
+
+	"for j in range()": {
+		"prefix": "for j",
+		"body": [
+			"for j in range($1):",
+			""
+		],
+		"description": "for"
+	},
+
+	"if": {
+		"prefix": "if",
+		"body": [
+			"if $1 :",
+		],
+		"description": "if"
+	},
+
+	"chk": {
+		"prefix": "chk = ",
+		"body": [
+			"chk = [True for i in range(N)]",
+		],
+		"description": "chklist"
+	},
+
+	"print": {
+		"prefix": "print",
+		"body": [
+			"print(''.join($1))",
+		],
+		"description": "listjoin",
+	},
+	
+	"syutugen": {
+		"prefix": "c = ",
+		"body": [
+			"c = collections.Counter($1)",
+			"for k,v in c.items():"
+		],
+		"description": "出現回数"
+	},
+
+	"uf": {
+		"prefix": "uf = ",
+		"body": [
+			"uf = UnionFind()",
+		],
+		"description": "use unionfind"
+	},
+
+	"second": {
+		"prefix": "sorted(",
+		"body": [
+			"sorted(C, key=lambda x: (x[1]))",
+		],
+		"description": "second value sort"
+	},
+
+	"": {
+		"prefix": "",
+		"body": [
+			"",
+		],
+		"description": ""
+	},
+
+}
